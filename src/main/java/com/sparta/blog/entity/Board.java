@@ -15,26 +15,20 @@ public class Board extends Timestamped{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "title", nullable = false, length = 30)
+    @Column(name = "title", nullable = false)
     private String title;
-    @Column(name="password", nullable = false)
-    private String password;
-    @Column(name = "writer", nullable = false, length = 30)
-    private String writer;
-    @Column(name = "contents", nullable = false, length = 500)
+    @Column(name = "username", nullable = false)
+    private String username;
+    @Column(name = "contents", nullable = false)
     private String contents;
 
-    public Board(BoardRequestDto requestDto) {
+    public Board(BoardRequestDto requestDto, String user) {
         this.title = requestDto.getTitle();
-        this.writer = requestDto.getWriter();
-        this.password = requestDto.getPassword();
         this.contents = requestDto.getContents();
     }
 
-    public void update(BoardRequestDto requestDto) {
-        this.title = requestDto.getTitle();
-        this.writer = requestDto.getWriter();
-        this.password = requestDto.getPassword();
-        this.contents = requestDto.getContents();
+    public void update(String title, String contents) {
+        this.title = title;
+        this.contents = contents;
     }
 }
