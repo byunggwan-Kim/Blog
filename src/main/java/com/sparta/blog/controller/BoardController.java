@@ -2,10 +2,12 @@ package com.sparta.blog.controller;
 
 import com.sparta.blog.dto.BoardRequestDto;
 import com.sparta.blog.dto.BoardResponseDto;
+import com.sparta.blog.entity.UserRoleEnum;
 import com.sparta.blog.jwt.JwtUtil;
+import com.sparta.blog.security.UserDetailsImpl;
 import com.sparta.blog.service.BoardService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +22,8 @@ public class BoardController {
 
     // 게시글 작성
     @PostMapping("/board")
-    public BoardResponseDto createBoard(@RequestBody BoardRequestDto requestDto,
-                                        @CookieValue(JwtUtil.AUTHORIZATION_HEADER) String tokenValue) {
-        return boardService.createBoard(requestDto, tokenValue);
+    public BoardResponseDto createBoard(@RequestBody BoardRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.createBoard(requestDto, userDetails.getUser());
     }
 
     // 전체 게시글 조회
@@ -39,16 +40,13 @@ public class BoardController {
 
     // 게시글 수정
     @PutMapping("/board/{id}")
-    public BoardResponseDto updateBoard(@PathVariable Long id,
-                                        @RequestBody BoardRequestDto requestDto,
-                                        @CookieValue(JwtUtil.AUTHORIZATION_HEADER) String tokenValue) {
-        return boardService.updateBoard(id, requestDto, tokenValue);
+    public ResponseEntity<String> updateBoard(@PathVariable Long id, @RequestBody BoardRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.updateBoard(id, requestDto, userDetails.getUser());
     }
 
     // 게시글 삭제
     @DeleteMapping("/board/{id}")
-    public BoardResponseDto deleteBoard(@PathVariable Long id,
-                                        @CookieValue(JwtUtil.AUTHORIZATION_HEADER) String tokenValue) {
-        return boardService.deleteBoard(id, tokenValue);
+    public ResponseEntity<String> deleteBoard(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.deleteBoard(id, userDetails.getUser());
     }
 }

@@ -1,15 +1,13 @@
 package com.sparta.blog.dto;
+
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class BoardRequestDto {
     private String title;
     private String contents;
-
-    public BoardRequestDto(String title, String contents) {
-        this.title = title;
-        this.contents = contents;
-    }
 }

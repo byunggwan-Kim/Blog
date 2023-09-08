@@ -4,17 +4,13 @@ import com.sparta.blog.dto.BoardRequestDto;
 import com.sparta.blog.dto.BoardResponseDto;
 import com.sparta.blog.entity.Board;
 import com.sparta.blog.entity.User;
-import com.sparta.blog.jwt.JwtUtil;
+import com.sparta.blog.entity.UserRoleEnum;
 import com.sparta.blog.repository.BoardRepository;
-import com.sparta.blog.repository.UserRepository;
-import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.CookieValue;
 
 import java.util.List;
 
@@ -22,35 +18,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardService {
     private final BoardRepository boardRepository;
-    private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
 
     // 게시글 작성
-    public BoardResponseDto createBoard(BoardRequestDto requestDto, @CookieValue(JwtUtil.AUTHORIZATION_HEADER) String tokenValue) {
-
-        String token = jwtUtil.substringToken(tokenValue);
-
-        if (!jwtUtil.validateToken(token)) {throw new IllegalArgumentException("Token Error");}
-
-        Claims claims = jwtUtil.getUserInfoFromToken(token);
-
-        String user = claims.getSubject();
-
-        // RequestDto -> Entity
-        Board board = new Board(requestDto, user);
-
-        // DB 저장
-        Board saveBoard = boardRepository.save(board);
-
-        // Entity -> ResponseDto
-        BoardResponseDto boardResponseDto = new BoardResponseDto(saveBoard);
-
-        return boardResponseDto;
+    public BoardResponseDto createBoard(BoardRequestDto requestDto, User user) {
+        Board board = boardRepository.save(new Board(requestDto, user));
+        return new BoardResponseDto(board);
     }
 
     // 전체 게시글 목록 조회
     public List<BoardResponseDto> getBoards() {
-        // DB 조회
         return boardRepository.findAllByOrderByCreatedAtDesc().stream().map(BoardResponseDto::new).toList();
     }
 
@@ -61,32 +37,35 @@ public class BoardService {
 
     // 선택한 게시글 수정
     @Transactional
-    public BoardResponseDto updateBoard(Long id, BoardRequestDto requestDto, @CookieValue(JwtUtil.AUTHORIZATION_HEADER) String tokenValue) {
-
-        String token = jwtUtil.substringToken(tokenValue);
-
-        if (!jwtUtil.validateToken(token)) {throw new IllegalArgumentException("Token Error");}
-
-        Claims claims = jwtUtil.getUserInfoFromToken(token);
-
+    public ResponseEntity<String> updateBoard(Long id, BoardRequestDto requestDto, User user) {
         Board board = findBoard(id);
+
+        if(user.getRole().equals(UserRoleEnum.ADMIN)) {
+            board.update(requestDto.getTitle(), requestDto.getContents());
+            return ResponseEntity.status(200).body("상태코드 : " + HttpStatus.OK.value() + " 메세지 : 관리자 권한 게시물 수정 성공");}
+
+        if(!board.getUser().getUsername().equals(user.getUsername())) {
+            return ResponseEntity.status(404).body("상태코드 : " + HttpStatus.BAD_REQUEST.value() + " 메세지 : 게시물 수정 불가");}
+
         board.update(requestDto.getTitle(), requestDto.getContents());
-        return new BoardResponseDto(board);
-    }
+        return ResponseEntity.status(200).body("상태코드 : " + HttpStatus.OK.value() + " 메세지 : 게시물 수정 성공");}
+
 
     // 선택한 게시글 삭제
-    public BoardResponseDto deleteBoard(Long id, @CookieValue(JwtUtil.AUTHORIZATION_HEADER) String tokenValue) {
-
-        String token = jwtUtil.substringToken(tokenValue);
-
-        if (!jwtUtil.validateToken(token)) {throw new IllegalArgumentException("Token Error");}
-
-        Claims claims = jwtUtil.getUserInfoFromToken(token);
-
+    @Transactional
+    public ResponseEntity<String> deleteBoard(Long id, User user) {
         Board board = findBoard(id);
+
+        if(user.getRole().equals(UserRoleEnum.ADMIN)) {
+            boardRepository.delete(board);
+            return ResponseEntity.status(200).body("상태코드 : " + HttpStatus.OK.value() + " 메세지 : 관리자 권한 게시물 삭제 성공");}
+
+        if(!board.getUser().getUsername().equals(user.getUsername())) {
+            return ResponseEntity.status(404).body("상태코드 : " + HttpStatus.BAD_REQUEST.value() + " 메세지 : 게시물 삭제 불가");}
+
         boardRepository.delete(board);
-        return new BoardResponseDto(board);
-    }
+        return ResponseEntity.status(200).body("상태코드 : " + HttpStatus.OK.value() + " 메세지 : 게시물 삭제 성공");}
+
     private Board findBoard(Long id) {
         return boardRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("선택한 메모는 존재하지 않습니다.")
