@@ -2,8 +2,6 @@ package com.sparta.blog.controller;
 
 import com.sparta.blog.dto.BoardRequestDto;
 import com.sparta.blog.dto.BoardResponseDto;
-import com.sparta.blog.entity.UserRoleEnum;
-import com.sparta.blog.jwt.JwtUtil;
 import com.sparta.blog.security.UserDetailsImpl;
 import com.sparta.blog.service.BoardService;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +38,7 @@ public class BoardController {
 
     // 게시글 수정
     @PutMapping("/board/{id}")
-    public ResponseEntity<String> updateBoard(@PathVariable Long id, @RequestBody BoardRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<BoardResponseDto> updateBoard(@PathVariable Long id, @RequestBody BoardRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.updateBoard(id, requestDto, userDetails.getUser());
     }
 
@@ -48,5 +46,11 @@ public class BoardController {
     @DeleteMapping("/board/{id}")
     public ResponseEntity<String> deleteBoard(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return boardService.deleteBoard(id, userDetails.getUser());
+    }
+
+    // 게시글 좋아요 기능
+    @PutMapping("/board/{id}/like")
+    public ResponseEntity<String> likeBoard(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return boardService.likeBoard(id, userDetails.getUser());
     }
 }

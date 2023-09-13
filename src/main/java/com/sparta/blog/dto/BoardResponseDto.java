@@ -1,6 +1,8 @@
 package com.sparta.blog.dto;
 
 import com.sparta.blog.entity.Board;
+import com.sparta.blog.entity.LikeBoard;
+import com.sparta.blog.entity.LikeComment;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -16,6 +18,7 @@ public class BoardResponseDto {
     private String contents;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+    private Integer likeCount;
 
     private List<CommentResponseDto> commentList = new ArrayList<>();
 //    private String password;
@@ -30,6 +33,7 @@ public class BoardResponseDto {
         this.modifiedAt = board.getModifiedAt();
         board.getCommentsList().forEach(comment -> commentList.add(new CommentResponseDto(comment)));
         Collections.reverse(commentList);
+        this.likeCount = board.getLikeBoardList().size();
     }
 
     public BoardResponseDto(Long id, BoardRequestDto requestDto) {
