@@ -35,34 +35,32 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     // 필터 검증
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
-        String accessToken = jwtUtil.getTokenFromRequest(req);
-        String refreshToken = jwtUtil.getJwtFromHeader(req);
+        String accessToken = jwtUtil.getJwtFromHeader(req, JwtUtil.AUTHORIZATION_HEADER);
+        String refreshToken = jwtUtil.getJwtFromHeader(req, JwtUtil.REFRESH_HEADER);
 
         // 토큰이 null인지, 길이가 0인지, 공백이 포함 되어 있는지 확인
         if (StringUtils.hasText(accessToken)) {
-
-            accessToken = jwtUtil.substringToken(accessToken);
             if (!jwtUtil.validateToken(accessToken)) {
-                if (!jwtUtil.validateToken(refreshToken)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+                String refresh = req.getHeader(JwtUtil.REFRESH_HEADER);
+                if (!jwtUtil.validateToken(refreshToken)  || !refreshTokenRepository.existsByToken(refresh)) {
+                    logger.error("Refresh Token Error");
+                    res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    return;
             }
+
+            logger.info("Access Token Recreate");
             Claims info = jwtUtil.getUserInfoFromToken(refreshToken);
             String username = info.getSubject();
+            UserRoleEnum role = UserRoleEnum.valueOf(String.valueOf(info.get("auth")));
 
-            RefreshToken existRefreshToken = refreshTokenRepository.findByUsername(username).orElseThrow(() ->
-                    new IllegalArgumentException("유효하지 않는 토큰입니다."));
-            String existRefreshTokenCode = jwtUtil.substringToken(existRefreshToken.getToken());
-            if (!existRefreshTokenCode.equals(refreshToken)) throw new IllegalArgumentException("유효하지 않는 토큰입니다.");
+            accessToken = jwtUtil.createAccessToken(username, role);
+            res.addHeader(JwtUtil.AUTHORIZATION_HEADER, accessToken);
+            accessToken = jwtUtil.substringToken(accessToken);
         }
-        Claims info = jwtUtil.getUserInfoFromToken(refreshToken);
-        String username = info.getSubject();
-        UserRoleEnum role = UserRoleEnum.valueOf(String.valueOf(info.get("auth")));
 
-        accessToken = jwtUtil.createAccessToken(username, role);
-        jwtUtil.addJwtToCookie(accessToken, res);
-        accessToken = jwtUtil.substringToken(accessToken);
+        Claims info = jwtUtil.getUserInfoFromToken(accessToken);
 
-        info = jwtUtil.getUserInfoFromToken(accessToken);
+        logger.info("Token Authentication");
         try {
             setAuthentication(info.getSubject());
         } catch (Exception e) {

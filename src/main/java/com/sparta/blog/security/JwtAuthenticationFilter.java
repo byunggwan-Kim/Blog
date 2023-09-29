@@ -50,31 +50,33 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     // 로그인 성공 시
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
         String username = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
         UserRoleEnum role = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getRole();
 
         String accessToken = jwtUtil.createAccessToken(username, role);
-        jwtUtil.addJwtToCookie(accessToken, response);
+        String refresh = jwtUtil.createRefreshToken(username, role);
 
         RefreshToken refreshToken = refreshTokenRepository.findByUsername(username).orElse(null);
-        String refresh = jwtUtil.createRefreshToken(username, role);
         if (refreshToken == null) {
             refreshToken = new RefreshToken(refresh, username);
         } else {
             refreshToken.updateToken(refresh);
         }
-        refreshTokenRepository.save(refreshToken);
-        response.addHeader("Refresh_Token", refreshToken.getToken());
 
+        refreshTokenRepository.save(refreshToken);
+
+        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, accessToken);
+        response.addHeader(JwtUtil.REFRESH_HEADER, refreshToken.getToken());
         response.setContentType("application/json; charset=UTF-8");
+
         MessageResponseDto message = new MessageResponseDto("로그인 성공했습니다.", HttpStatus.OK.value());
         ObjectMapper objectMapper = new ObjectMapper();
         response.getWriter().write(objectMapper.writeValueAsString(message));
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
         response.setStatus(401);
         response.setContentType("application/json; charset=UTF-8");
         MessageResponseDto message = new MessageResponseDto("로그인 실패했습니다.", HttpStatus.UNAUTHORIZED.value());

@@ -25,7 +25,6 @@ public class RefreshToken {
         this.token = token;
         this.username = username;
     }
-
     public void updateToken(String token) {
         this.token = token;
 
