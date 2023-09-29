@@ -47,7 +47,7 @@ public class BoardService {
 
         if (user.getRole().equals(UserRoleEnum.ADMIN)) {
             board.update(requestDto.getTitle(), requestDto.getContents());
-            return ResponseEntity.status(200).body(new BoardResponseDto(board));
+            return ResponseEntity.status(HttpStatus.OK).body(new BoardResponseDto(board));
         }
 
         if (!board.getUser().getUsername().equals(user.getUsername())) {
@@ -55,9 +55,8 @@ public class BoardService {
         }
 
         board.update(requestDto.getTitle(), requestDto.getContents());
-        return ResponseEntity.status(200).body(new BoardResponseDto(board));
+        return ResponseEntity.status(HttpStatus.OK).body(new BoardResponseDto(board));
     }
-
 
     // 선택한 게시글 삭제
     @Transactional
