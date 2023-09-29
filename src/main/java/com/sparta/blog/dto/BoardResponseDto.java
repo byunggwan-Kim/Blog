@@ -1,8 +1,6 @@
 package com.sparta.blog.dto;
 
 import com.sparta.blog.entity.Board;
-import com.sparta.blog.entity.LikeBoard;
-import com.sparta.blog.entity.LikeComment;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
