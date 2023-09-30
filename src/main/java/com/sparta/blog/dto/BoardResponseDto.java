@@ -14,6 +14,7 @@ public class BoardResponseDto {
     private String title;
     private String username;
     private String contents;
+    private String imgUrl;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
     private Integer likeCount;
@@ -27,6 +28,7 @@ public class BoardResponseDto {
         this.title = board.getTitle();
         this.username = board.getUser().getUsername();
         this.contents = board.getContents();
+        this.imgUrl = board.getImgUrl();
         this.createdAt = board.getCreatedAt();
         this.modifiedAt = board.getModifiedAt();
         board.getCommentsList().forEach(comment -> commentList.add(new CommentResponseDto(comment)));
