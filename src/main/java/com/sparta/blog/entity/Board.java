@@ -1,11 +1,13 @@
 package com.sparta.blog.entity;
 
 import com.sparta.blog.dto.BoardRequestDto;
+import com.sparta.blog.dto.BoardRequestModel;
 import com.sparta.blog.dto.CommentResponseDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,9 @@ public class Board extends Timestamped{
     @Column(name = "contents", nullable = false)
     private String contents;
 
+    @Column
+    private String imgUrl;
+
     @OneToMany(mappedBy = "board", cascade = CascadeType.REMOVE)
     private List<Comment> commentsList = new ArrayList<>();
 
@@ -39,6 +44,13 @@ public class Board extends Timestamped{
     public Board(BoardRequestDto requestDto, User user) {
         this.title = requestDto.getTitle();
         this.contents = requestDto.getContents();
+        this.user = user;
+    }
+
+    public Board(BoardRequestModel boardRequestModel, User user, String imgUrl) {
+        this.title = boardRequestModel.getTitle();
+        this.contents = boardRequestModel.getContents();
+        this.imgUrl = imgUrl;
         this.user = user;
     }
 
