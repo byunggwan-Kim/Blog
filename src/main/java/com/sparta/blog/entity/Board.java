@@ -41,12 +41,6 @@ public class Board extends Timestamped{
     @JoinColumn(name ="users_id", nullable = false)
     private User user;
 
-    public Board(BoardRequestDto requestDto, User user) {
-        this.title = requestDto.getTitle();
-        this.contents = requestDto.getContents();
-        this.user = user;
-    }
-
     public Board(BoardRequestModel boardRequestModel, User user, String imgUrl) {
         this.title = boardRequestModel.getTitle();
         this.contents = boardRequestModel.getContents();
