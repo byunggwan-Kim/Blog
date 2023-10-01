@@ -3,7 +3,6 @@ package com.sparta.blog.controller;
 import com.sparta.blog.dto.*;
 import com.sparta.blog.security.UserDetailsImpl;
 import com.sparta.blog.service.BoardService;
-import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +28,7 @@ public class BoardController {
 
     // 전체 게시글 조회
     @GetMapping("/boards")
-    public List<BoardResponseDto> getBoards() {
+    public ApiResponse<List<BoardResponseDto>> getBoards() {
         return boardService.getBoards();
     }
 

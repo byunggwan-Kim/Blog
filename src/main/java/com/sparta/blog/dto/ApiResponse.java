@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ApiResponse<T> {
@@ -32,5 +34,9 @@ public class ApiResponse<T> {
     //에러
     public static <T> ApiResponse<T> error(String message) {
         return new ApiResponse<>(ERROR_STATUS, message, null);
+    }
+
+    public static ApiResponse<List<BoardResponseDto>> successDataList(List<BoardResponseDto> responseDtos) {
+        return new ApiResponse<>(SUCCESS_STATUS, null, responseDtos);
     }
 }

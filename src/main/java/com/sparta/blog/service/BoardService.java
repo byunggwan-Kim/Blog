@@ -15,6 +15,7 @@ import com.sparta.blog.repository.LikeBoardRepository;
 import com.sparta.blog.repository.UserRepository;
 import com.sparta.blog.s3.S3Uploader;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,8 +44,13 @@ public class BoardService {
     }
 
     // 전체 게시글 목록 조회
-    public List<BoardResponseDto> getBoards() {
-        return boardRepository.findAllByOrderByCreatedAtDesc().stream().map(BoardResponseDto::new).toList();
+//    public List<BoardResponseDto> getBoards() {
+//        return boardRepository.findAllByOrderByCreatedAtDesc().stream().map(BoardResponseDto::new).toList();
+//    }
+
+    public ApiResponse<List<BoardResponseDto>> getBoards() {
+        List<BoardResponseDto> responseDtos = boardRepository.findAllByOrderByCreatedAtDesc().stream().map(BoardResponseDto::new).collect(Collectors.toList());
+        return ApiResponse.successDataList(responseDtos);
     }
 
     // 선택한 게시글 조회
