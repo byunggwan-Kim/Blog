@@ -1,0 +1,32 @@
+cloud:
+  aws:
+    credentials:
+      secret-key: ${AWS_SECRET_KEY}
+      access-key: ${AWS_ACCESS_KEY}
+    s3:
+      bucket: blogbucket116
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: 'false'
+spring:
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+  jpa:
+    properties:
+      hibernate:
+        use_sql_comments: 'true'
+        format_sql: 'true'
+        show_sql: 'true'
+    hibernate:
+      ddl-auto: update
+  datasource:
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    url: ${DB_URL}
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
